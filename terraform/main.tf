@@ -1,6 +1,6 @@
 provider "google" {
-  project = "infra-244517"
-  region  = "europe-west1"
+  project = "${var.project}"
+  region  = "${var.region}"
 }
 
 resource "google_compute_instance" "app" {
@@ -9,7 +9,7 @@ resource "google_compute_instance" "app" {
   zone         = "europe-west1-b"
   boot_disk {
     initialize_params {
-      image = "reddit-base-1561224901"
+      image = "${var.disk_image}"
     }
   }
   network_interface {
@@ -17,7 +17,7 @@ resource "google_compute_instance" "app" {
     access_config {}
   }
   metadata = {
-    sshKeys = "appuser:${file("~/.ssh/appuser.pub")}"
+    sshKeys = "appuser:${file(var.public_key_path)}"
   }
   tags = ["reddit-app"]
   connection {
@@ -25,7 +25,7 @@ resource "google_compute_instance" "app" {
     type        = "ssh"
     user        = "appuser"
     agent       = false
-    private_key = "${file("~/.ssh/appuser")}"
+    private_key = "${file(var.private_key_path)}"
   }
   provisioner "file" {
     source      = "files/puma.service"
